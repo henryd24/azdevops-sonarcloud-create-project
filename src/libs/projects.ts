@@ -10,7 +10,7 @@ export class Projects{
         this.Created = false;
     }
     async getSonarProject(sonarToken:string|undefined, sonarOrganization: string|undefined ,serviceKey: string|undefined){
-        const getPorjectUrl: string = `${this.baseURL}/api/projects/search?organization=${sonarOrganization}&project=${serviceKey}`;
+        const getPorjectUrl: string = `${this.baseURL}/api/projects/search?organization=${sonarOrganization}&projects=${serviceKey}`;
         const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
         await fetch(getPorjectUrl, {
             method: 'GET',

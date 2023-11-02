@@ -6,8 +6,8 @@
   "scripts": {
     "postinstall": "cd src && npm install",
     "build": "cd src && npm run build",
-    "pack": "tfx extension create --manifest-globs vss-extension.json",
-    "packupversion": "tfx extension create --manifest-globs vss-extension.json --rev-version"
+    "pack": "npm run build && tfx extension create --manifest-globs vss-extension.json",
+    "packupversion": "npm run build && tfx extension create --manifest-globs vss-extension.json --rev-version"
   },
   "devDependencies": {
     "tfx-cli": "^0.14.0",
