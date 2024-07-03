@@ -5,8 +5,8 @@ export class Settings{
     constructor(){
         this.baseURL = "https://sonarcloud.io";
     }
-    async setLongLiveBranches(sonarToken:string|undefined, sonarOrganization: string|undefined ,serviceName: string|undefined,longlivebranches: string|undefined){
-        const setLongLiveBranches: string = `${this.baseURL}/api/settings/set?organization=${sonarOrganization}&component=${serviceName}&key=sonar.branch.longLivedBranches.regex&value=${longlivebranches}`;
+    async setLongLiveBranches(sonarToken:string|undefined,serviceName: string|undefined,longlivebranches: string|undefined){
+        const setLongLiveBranches: string = `${this.baseURL}/api/settings/set?component=${serviceName}&key=sonar.branch.longLivedBranches.regex&value=${longlivebranches}`;
         const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
         await fetch(setLongLiveBranches, {
             method: 'POST',

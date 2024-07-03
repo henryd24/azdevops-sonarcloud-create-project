@@ -45,7 +45,7 @@ async function run() {
 
                 if(long_live_branches){
                     let settings = new Settings()
-                    await settings.setLongLiveBranches(sonarToken,sonarOrganization,serviceKey,long_live_branches)
+                    await settings.setLongLiveBranches(sonarToken,serviceKey,long_live_branches)
                 }
             }
         }
