@@ -9,7 +9,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 4
+        "Patch": 5
     },
     "visibility": [
         "Release",
@@ -122,7 +122,7 @@
         }
     ],
     "execution": {
-        "Node": {
+        "Node20_1": {
             "target": "./index.js"
         }
     }

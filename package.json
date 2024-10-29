@@ -4,14 +4,17 @@
   "description": "An extension to check and create projects in sonarcloud. This extension is designed to help with [SonarCloud](https://sonarcloud.io/) by providing a helper task.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "cd src && npm install",
-    "build": "cd src && npm run build",
-    "pack": "npm run build && tfx extension create --manifest-globs vss-extension.json",
-    "packupversion": "npm run build && tfx extension create --manifest-globs vss-extension.json --rev-version"
+    "postinstall": "azde-scripts install src",
+    "build": "azde-scripts build src",
+    "pack": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --overrides-file config/release.json",
+    "packupversion": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/release.json",
+    "pack:dev": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --overrides-file config/dev.json",
+    "packupversion:dev": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/dev.json"
   },
   "devDependencies": {
     "tfx-cli": "^0.14.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "azde-scripts": "^1.0.0"
   },
   "author": "",
   "license": "ISC"
