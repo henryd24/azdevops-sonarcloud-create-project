@@ -16,6 +16,12 @@ async function run() {
         const long_live_branches: string | undefined = tl.getInput('long_live_branches', false);
         const visibility: string | undefined = tl.getInput('visibility', true);
         const sonarQualityGate: string | undefined = tl.getInput('sonarQualityGate', false);
+        const enableNewCodeDefinition: boolean | undefined = tl.getBoolInput('enableNewCodeDefinition', false);
+        const newCodeDefinitionType: string | undefined = tl.getInput('newCodeDefinitionType', false);
+        let newCodeDefinitionValue: string | undefined = tl.getInput('newCodeDefinitionValue', false);
+        if (newCodeDefinitionType === 'previous_version') {
+            newCodeDefinitionValue = 'previous_version';
+        }
         let Project = new Projects();
         await Project.getSonarProject(sonarToken,sonarOrganization,serviceKey);
 
@@ -28,7 +34,7 @@ async function run() {
         if(createProject=="true"){
             if(!Project.Created){
                 console.info(`Creating the ${serviceKey} project`)
-                await Project.createSonarProject(sonarToken,sonarOrganization,serviceKey,serviceName,visibility)
+                await Project.createSonarProject(sonarToken,sonarOrganization,serviceKey,serviceName,visibility,newCodeDefinitionType,newCodeDefinitionValue);
             }else{
                 console.info(`The creation of ${serviceKey} is omitted.`)
             }
@@ -46,6 +52,14 @@ async function run() {
                 if(long_live_branches){
                     let settings = new Settings()
                     await settings.setLongLiveBranches(sonarToken,serviceKey,long_live_branches)
+                }
+
+                if(enableNewCodeDefinition){
+                    let settings = new Settings()
+                    await settings.setNewCodeDefinitionType(sonarToken,serviceKey,newCodeDefinitionType)
+                    if (newCodeDefinitionType != 'previous_version'){
+                        await settings.setNewCodeDefinition(sonarToken,serviceKey,newCodeDefinitionValue)
+                    }
                 }
             }
         }

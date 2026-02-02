@@ -12,7 +12,7 @@
     "packupversion:dev": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/dev.json"
   },
   "devDependencies": {
-    "tfx-cli": "^0.14.0",
+    "tfx-cli": "^0.22.2",
     "typescript": "^3.5.3",
     "azde-scripts": "^1.0.0"
   },
