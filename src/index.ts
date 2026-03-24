@@ -19,6 +19,7 @@ async function run() {
         const enableNewCodeDefinition: boolean | undefined = tl.getBoolInput('enableNewCodeDefinition', false);
         const newCodeDefinitionType: string | undefined = tl.getInput('newCodeDefinitionType', false);
         let newCodeDefinitionValue: string | undefined = tl.getInput('newCodeDefinitionValue', false);
+        const mainBranch: string | undefined = tl.getInput('mainBranch', false);
         if (newCodeDefinitionType === 'previous_version') {
             newCodeDefinitionValue = 'previous_version';
         }
@@ -32,36 +33,40 @@ async function run() {
         }
 
         if(createProject=="true"){
+            console.info(`##[group]Project configuration for ${serviceKey} project`)
             if(!Project.Created){
-                console.info(`Creating the ${serviceKey} project`)
-                await Project.createSonarProject(sonarToken,sonarOrganization,serviceKey,serviceName,visibility,newCodeDefinitionType,newCodeDefinitionValue);
+                console.info(`##[section]Creating the ${serviceKey} project`)
+                await Project.createSonarProject(sonarToken,sonarOrganization,serviceKey,serviceName,visibility);
             }else{
-                console.info(`The creation of ${serviceKey} is omitted.`)
+                console.info(`##[section]The creation of ${serviceKey} is omitted.`)
             }
             if(Project.Created){
                 if(tags){
-                    let Tag = new Tags();
-                    await Tag.setTags(sonarToken,sonarOrganization,serviceKey,tags)
+                    let Tag = new Tags(sonarToken, serviceKey);
+                    await Tag.setTags(sonarOrganization,tags)
                 }
         
                 if(sonarQualityGate){
-                    let qualityGate = new QualityGate();
-                    await qualityGate.setQualityGate(sonarToken,sonarOrganization,serviceKey,sonarQualityGate)
+                    let qualityGate = new QualityGate(sonarToken, serviceKey);
+                    await qualityGate.setQualityGate(sonarOrganization, sonarQualityGate)
                 }
 
+                let settings = new Settings(sonarToken, serviceKey);
+                
                 if(long_live_branches){
-                    let settings = new Settings()
-                    await settings.setLongLiveBranches(sonarToken,serviceKey,long_live_branches)
+                    await settings.setLongLiveBranches(long_live_branches)
                 }
 
                 if(enableNewCodeDefinition){
-                    let settings = new Settings()
-                    await settings.setNewCodeDefinitionType(sonarToken,serviceKey,newCodeDefinitionType)
-                    if (newCodeDefinitionType != 'previous_version'){
-                        await settings.setNewCodeDefinition(sonarToken,serviceKey,newCodeDefinitionValue)
-                    }
+                    await settings.setNewCodeDefinitionType(newCodeDefinitionType)
+                    await settings.setNewCodeDefinition(newCodeDefinitionValue)                    
+                }
+
+                if(mainBranch){
+                    await settings.mainBranchName(mainBranch)
                 }
             }
+            console.info(`##[endgroup]`)
         }
     }
     catch (err) {

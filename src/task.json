@@ -8,8 +8,8 @@
     "author": "Henry Mosquera",
     "version": {
         "Major": 1,
-        "Minor": 0,
-        "Patch": 5
+        "Minor": 1,
+        "Patch": 0
     },
     "visibility": [
         "Release",
@@ -63,6 +63,15 @@
             }
         },
         {
+            "name": "mainBranch", 
+            "type": "string",
+            "label": "Main Branch Name",
+            "defaultValue": "trunk",
+            "required": false,
+            "visibleRule": "createProject = true",
+            "helpMarkDown": "Define the main branch name, e.g., trunk or release. (Optional)"
+        },
+        {
             "name": "visibility",
             "type": "radio",
             "label": "Visibility",
@@ -89,7 +98,7 @@
             "label": "Long-lived branches (regex)",
             "visibleRule": "createProject = true",
             "required": false,
-            "helpMarkDown": "Long-lived branches (regex), e.g.: (master|qa)"
+            "helpMarkDown": "Long-lived branches (regex), e.g.: (master|qa). (Optional)"
         },
         {
             "name": "sonarQualityGate",
@@ -97,7 +106,7 @@
             "label": "Select the quality gate",
             "visibleRule": "createProject = true",
             "required": false,
-            "helpMarkDown": "Select the quality gate you want to configure in the project",
+            "helpMarkDown": "Select the quality gate you want to configure in the project. (Optional)",
             "properties": {
               "EditableOptions": "True"
             }
@@ -109,7 +118,7 @@
             "defaultValue": false,
             "required": false,
             "visibleRule": "createProject = true",
-            "helpMarkDown": "Check to configure new code definition options."
+            "helpMarkDown": "Check to configure new code definition options. (Optional)"
         },
         {
             "groupName": "newCodeDefinitionGroup",
@@ -122,7 +131,7 @@
                 "label": "New Code Definition Type",
                 "defaultValue": "previous_version",
                 "required": false,
-                "helpMarkDown": "Select the new code definition type.",
+                "helpMarkDown": "Select the new code definition type. (Optional)",
                 "options": {
                     "previous_version": "Previous Version",
                     "days": "Days",
@@ -137,17 +146,9 @@
                 "defaultValue": "previous_version",
                 "required": false,
                 "visibleRule": "newCodeDefinitionType = days OR newCodeDefinitionType = date OR newCodeDefinitionType = version",
-                "helpMarkDown": "Define the value for the new code definition type selected."
+                "helpMarkDown": "Define the value for the new code definition type selected. (Optional)"
             }
             ]
-        },
-        {
-            "name": "mainBranch", 
-            "type": "string",
-            "label": "Main Branch Name",
-            "defaultValue": "trunk",
-            "required": false,
-            "helpMarkDown": "Define the main branch name, e.g., trunk or release."
         }
     ],
     "dataSourceBindings": [
@@ -170,6 +171,9 @@
     ],
     "execution": {
         "Node20_1": {
+            "target": "./index.js"
+        },
+        "Node24": {
             "target": "./index.js"
         }
     }

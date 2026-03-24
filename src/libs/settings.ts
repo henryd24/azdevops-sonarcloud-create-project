@@ -2,98 +2,91 @@ import fetch from 'node-fetch';
 
 export class Settings{
     baseURL: string;
-    constructor(){
+    header: any;
+    serviceKey: string | undefined;
+    constructor(sonarToken:string|undefined, serviceKey: string|undefined){
         this.baseURL = "https://sonarcloud.io";
+        const base64_token: string = Buffer.from(sonarToken+':').toString('base64');
+        this.header = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + base64_token
+        }
+        this.serviceKey = serviceKey;
     }
-    async setLongLiveBranches(sonarToken:string|undefined,serviceName: string|undefined,longlivebranches: string|undefined){
-        const setLongLiveBranches: string = `${this.baseURL}/api/settings/set?component=${serviceName}&key=sonar.branch.longLivedBranches.regex&value=${longlivebranches}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
+    async setLongLiveBranches(longlivebranches: string|undefined){
+        const setLongLiveBranches: string = `${this.baseURL}/api/settings/set?component=${this.serviceKey}&key=sonar.branch.longLivedBranches.regex&value=${longlivebranches}`;
         await fetch(setLongLiveBranches, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
+            headers: this.header
         })
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`Longlivebranches pattern: ${longlivebranches} were set correctly`)
+                console.info(`##[section]Longlivebranches pattern: ${longlivebranches} were set correctly`)
             }else{
-                console.warn(`Unable to set long duration pattern, error code: ${statusCode}`)
+                console.warn(`##[warning]Unable to set long duration pattern, error code: ${statusCode}`)
             }
         })
         .catch(error => {
             console.error(error);
         })
     }
-    async setNewCodeDefinitionType(sonarToken:string|undefined,serviceName: string|undefined,newcodedefinitiontype: string|undefined,){
-        const setNewCodeDefinitionType: string = `${this.baseURL}/api/settings/set?component=${serviceName}&key=sonar.leak.period.type&value=${newcodedefinitiontype}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
+    async setNewCodeDefinitionType(newcodedefinitiontype: string|undefined,){
+        const setNewCodeDefinitionType: string = `${this.baseURL}/api/settings/set?component=${this.serviceKey}&key=sonar.leak.period.type&value=${newcodedefinitiontype}`;
         await fetch(setNewCodeDefinitionType, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
+            headers: this.header
         })
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`New code definition type: ${newcodedefinitiontype} were set correctly`)
+                console.info(`##[section]New code definition type: ${newcodedefinitiontype} were set correctly`)
             }else{
-                console.warn(`Unable to set new code definition type, error code: ${statusCode}`)
+                console.warn(`##[warning]Unable to set new code definition type, error code: ${statusCode}`)
             }
         })
         .catch(error => {
-            console.error(error);
+            console.error(`##[error]${error}`);
         })
     }
 
-    async setNewCodeDefinition(sonarToken:string|undefined,serviceName: string|undefined,newcodedefinitionvalue: string|undefined){
-        const setNewCodeDefinitionValue: string = `${this.baseURL}/api/settings/set?component=${serviceName}&key=sonar.leak.period&value=${newcodedefinitionvalue}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
+    async setNewCodeDefinition(newcodedefinitionvalue: string|undefined){
+        const setNewCodeDefinitionValue: string = `${this.baseURL}/api/settings/set?component=${this.serviceKey}&key=sonar.leak.period&value=${newcodedefinitionvalue}`;
         await fetch(setNewCodeDefinitionValue, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
+            headers: this.header
         })
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`New code definition value: ${newcodedefinitionvalue} were set correctly`)
+                console.info(`##[section]New code definition value: ${newcodedefinitionvalue} were set correctly`)
             }else{
-                console.warn(`Unable to set new code definition value, error code: ${statusCode}`)
+                console.warn(`##[warning]Unable to set new code definition value, error code: ${statusCode}`)
             }
         })
         .catch(error => {
-            console.error(error);
+            console.error(`##[error]${error}`);
         })
     }
 
-    // TODO: revisar si se debe verificiar si la rama ya existe un analisis para poder cambiar el nombre de la rama principal
-    async mainBranchName(sonarToken:string|undefined,serviceName: string|undefined,mainbranchname: string|undefined){
-        const setMainBranchName: string = `${this.baseURL}/api/settings/set?component=${serviceName}&key=sonar.branch.main&value=${mainbranchname}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
+    async mainBranchName(mainbranchname: string|undefined){
+        const setMainBranchName: string = `${this.baseURL}/api/project_branches/rename?project=${this.serviceKey}&name=${mainbranchname}`;
         await fetch(setMainBranchName, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
+            headers: this.header
         })
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`Main branch name: ${mainbranchname} were set correctly`)
+                console.info(`##[section]Main branch name: ${mainbranchname} were set correctly`)
+            }else if(statusCode == 400){
+                console.warn(`##[warning]Unable to set main branch name, the branch name ${mainbranchname} is already in use.`)
             }else{
-                console.warn(`Unable to set main branch name, error code: ${statusCode}`)
+                console.warn(`##[warning]Unable to set main branch name, error code: ${statusCode}`)
             }
         })
         .catch(error => {
-            console.error(error);
+            console.error(`##[error]${error}`);
         })
     }
 }
