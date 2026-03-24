@@ -7,22 +7,22 @@ describe('Projects', () => {
     let quality_gate: QualityGate;
 
     beforeEach(() => {
-        quality_gate = new QualityGate();
+        quality_gate = new QualityGate('sonarToken','serviceKey');
         fetchMock.resetMocks();
     });
 
     test('setQualityGate', async () => {
         const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
         fetchMock.mockResponseOnce(JSON.stringify({}), { status: 204 });
-        await quality_gate.setQualityGate('sonarToken', 'sonarOrganization', 'serviceName', 'gateId');
-        expect(consoleSpy).toHaveBeenCalledWith("The quality gate with id: gateId was configured correctly.");
+        await quality_gate.setQualityGate('sonarOrganization', 'gateId');
+        expect(consoleSpy).toHaveBeenCalledWith('The quality gate with id: gateId was configured correctly.');
         consoleSpy.mockRestore();
     });
     test('setQualityGate error handling', async () => {
         const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
         fetchMock.mockResponseOnce('', { status: 401 });
-        await quality_gate.setQualityGate('sonarToken', 'sonarOrganization', 'serviceName', 'gateId');
-        expect(consoleSpy).toHaveBeenCalledWith("Failed to configure qualitygate, error code: 401");
+        await quality_gate.setQualityGate('sonarOrganization', 'gateId');
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to configure qualitygate, error code: 401');
         consoleSpy.mockRestore();
     });
 });
