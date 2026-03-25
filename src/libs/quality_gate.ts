@@ -1,4 +1,4 @@
- 
+import { info, warn, success, error } from './logger';
 export class QualityGate{
     baseURL: string;
     serviceKey: string | undefined;
@@ -21,13 +21,13 @@ export class QualityGate{
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`The quality gate with id: ${gateId} was configured correctly.`)
+                success(`The quality gate with id: ${gateId} was configured correctly.`);
             }else{
-                console.warn(`Failed to configure qualitygate, error code: ${statusCode}`)
+                warn(`Failed to configure qualitygate, error code: ${statusCode}`);
             }
         })
         .catch(error => {
-            console.error(error);
+            error(`An error occurred while configuring the quality gate: ${error}`);
         })
     }
 }

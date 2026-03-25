@@ -69,7 +69,7 @@ async function run() {
                     await settings.mainBranchName(mainBranch)
                 }
             }
-            endGroup(`Project ${serviceKey}`)
+            endGroup()
         }
     }
     catch (err) {

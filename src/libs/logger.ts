@@ -18,9 +18,8 @@ export function group(title: string) {
   console.info(`##[group]${title}`);
 }
 
-export function endGroup(title?: string) {
-  const t = title ? ` ${title}` : '';
-  console.info(`##[endgroup]${t}`);
+export function endGroup() {
+  console.info(`##[endgroup]`);
 }
 
 export default { info, success, warn, error, group, endGroup };
