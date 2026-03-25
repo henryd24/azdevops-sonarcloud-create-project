@@ -6,22 +6,22 @@
     "test": "jest",
     "testdev": "jest --watch",
     "coverage": "jest --coverage",
-    "build": "tsc -p tsconfig.build.json; cp -r task.json icon.png node_modules ../dist"
+    "build": "tsc -p tsconfig.build.json",
+    "configure": "cp -r task.json icon.png ../dist/task",
+    "package": "ncc build index.ts -o ../dist/task && npm run configure"
   },
   "keywords": [],
   "author": "Henry Mosquera",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^24.10.0",
-    "azure-pipelines-task-lib": "^5.2.4",
-    "node-fetch": "^2.6.1"
+    "azure-pipelines-task-lib": "^5.2.4"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/mocha": "^10.0.1",
     "@types/node": "^24.10.0",
-    "@types/node-fetch": "^2.6.3",
     "@types/q": "^1.5.5",
+    "@vercel/ncc": "^0.38.4",
     "jest-fetch-mock": "^3.0.3",
     "sync-request": "^6.1.0",
     "ts-jest": "^29.1.2",

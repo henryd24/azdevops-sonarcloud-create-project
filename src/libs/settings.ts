@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 export class Settings{
     baseURL: string;

@@ -1,5 +1,4 @@
-import fetch from 'node-fetch';
-
+ 
 export class QualityGate{
     baseURL: string;
     serviceKey: string | undefined;

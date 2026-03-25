@@ -1,5 +1,4 @@
-import fetch from 'node-fetch';
-
+ 
 export class Tags{
     baseURL: string;
     serviceKey: string | undefined;
@@ -22,7 +21,7 @@ export class Tags{
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`##[section] Tags: ${tags} were set correctly`)
+                console.info(`##[section]Tags: ${tags} were set correctly`)
             }else{
                 console.warn(`##[warning] Could not configure tags, error code: ${statusCode}`)
             }

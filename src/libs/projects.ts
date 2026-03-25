@@ -1,6 +1,4 @@
 import * as tl from "azure-pipelines-task-lib";
-import fetch from 'node-fetch';
-
 
 export class Projects{
     baseURL: string;
