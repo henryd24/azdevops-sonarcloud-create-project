@@ -2,7 +2,6 @@
     "manifestVersion": 1,
     "id": "sonarcloud-create-project",
     "name": "SonarCloud create project",
-    "version": "1.0.4",
     "publisher": "hendamm",
     "public": true,
     "repository": {
@@ -52,7 +51,7 @@
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "dist"
+                "name": "dist/task"
             }
         }
     ]

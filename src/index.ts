@@ -1,4 +1,5 @@
 import * as tl from "azure-pipelines-task-lib";
+import { group, info, endGroup } from './libs/logger';
 import { Projects } from './libs/projects';
 import { QualityGate } from './libs/quality_gate'
 import { Tags } from "./libs/tags"
@@ -16,6 +17,11 @@ async function run() {
         const long_live_branches: string | undefined = tl.getInput('long_live_branches', false);
         const visibility: string | undefined = tl.getInput('visibility', true);
         const sonarQualityGate: string | undefined = tl.getInput('sonarQualityGate', false);
+        const enableNewCodeDefinition: boolean | undefined = tl.getBoolInput('enableNewCodeDefinition', false);
+        const newCodeDefinitionType: string | undefined = tl.getInput('newCodeDefinitionType', false);
+        let newCodeDefinitionValue: string | undefined = tl.getInput('newCodeDefinitionValue', false);
+        const mainBranch: string | undefined = tl.getInput('mainBranch', false);
+
         let Project = new Projects();
         await Project.getSonarProject(sonarToken,sonarOrganization,serviceKey);
 
@@ -26,28 +32,44 @@ async function run() {
         }
 
         if(createProject=="true"){
+            group(`Project configuration for ${serviceKey} project`)
             if(!Project.Created){
-                console.info(`Creating the ${serviceKey} project`)
-                await Project.createSonarProject(sonarToken,sonarOrganization,serviceKey,serviceName,visibility)
+                info(`Creating the ${serviceKey} project`)
+                await Project.createSonarProject(sonarToken,sonarOrganization,serviceKey,serviceName,visibility);
             }else{
-                console.info(`The creation of ${serviceKey} is omitted.`)
+                info(`The creation of ${serviceKey} is omitted.`)
             }
             if(Project.Created){
                 if(tags){
-                    let Tag = new Tags();
-                    await Tag.setTags(sonarToken,sonarOrganization,serviceKey,tags)
+                    let Tag = new Tags(sonarToken, serviceKey);
+                    await Tag.setTags(sonarOrganization,tags)
                 }
         
                 if(sonarQualityGate){
-                    let qualityGate = new QualityGate();
-                    await qualityGate.setQualityGate(sonarToken,sonarOrganization,serviceKey,sonarQualityGate)
+                    let qualityGate = new QualityGate(sonarToken, serviceKey);
+                    await qualityGate.setQualityGate(sonarOrganization, sonarQualityGate)
                 }
 
+                let settings = new Settings(sonarToken, serviceKey);
+                
                 if(long_live_branches){
-                    let settings = new Settings()
-                    await settings.setLongLiveBranches(sonarToken,serviceKey,long_live_branches)
+                    await settings.setLongLiveBranches(long_live_branches)
+                }
+
+                if(enableNewCodeDefinition){
+                    if (newCodeDefinitionType === 'previous_version') {
+                        info('New code definition type is set to previous_version, the new code definition value will be omitted.')
+                        newCodeDefinitionValue = 'previous_version';
+                    }
+                    await settings.setNewCodeDefinitionType(newCodeDefinitionType)
+                    await settings.setNewCodeDefinition(newCodeDefinitionValue)                    
+                }
+
+                if(mainBranch){
+                    await settings.mainBranchName(mainBranch)
                 }
             }
+            endGroup()
         }
     }
     catch (err) {

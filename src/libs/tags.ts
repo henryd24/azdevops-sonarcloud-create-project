@@ -1,30 +1,34 @@
-import fetch from 'node-fetch';
+import { info, warn, error } from "./logger";
 
 export class Tags{
     baseURL: string;
-    constructor(){
+    serviceKey: string | undefined;
+    header: any;
+    constructor(sonarToken:string|undefined, serviceKey: string|undefined){
         this.baseURL = "https://sonarcloud.io";
+        const base64_token: string = Buffer.from(sonarToken+':').toString('base64');
+        this.header = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + base64_token
+        }
+        this.serviceKey = serviceKey;
     }
-    async setTags(sonarToken:string|undefined, sonarOrganization: string|undefined ,serviceName: string|undefined,tags: string|undefined){
-        const setQualityGate: string = `${this.baseURL}/api/project_tags/set?organization=${sonarOrganization}&project=${serviceName}&tags=${tags}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
+    async setTags(sonarOrganization: string|undefined, tags: string|undefined){
+        const setQualityGate: string = `${this.baseURL}/api/project_tags/set?organization=${sonarOrganization}&project=${this.serviceKey}&tags=${tags}`;
         await fetch(setQualityGate, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
+            headers: this.header
         })
         .then(response => response.status)
         .then(statusCode =>{
-            if(statusCode == 204){
-                console.info(`Tags: ${tags} were set correctly`)
+                if(statusCode == 204){
+                info(`Tags: ${tags} were set correctly`)
             }else{
-                console.warn(`Could not configure tags, error code: ${statusCode}`)
+                warn(`Could not configure tags, error code: ${statusCode}`)
             }
         })
-        .catch(error => {
-            console.error(error);
+        .catch(err => {
+            error(`tags: ${err}`);
         })
     }
 }

@@ -8,14 +8,22 @@
     "author": "Henry Mosquera",
     "version": {
         "Major": 1,
-        "Minor": 0,
-        "Patch": 5
+        "Minor": 1,
+        "Patch": 0
     },
     "visibility": [
         "Release",
         "Build"
     ],
     "instanceNameFormat": "SonarCloud Create Project",
+    "groups": [
+        {
+            "name": "newCodeDefinitionGroup",
+            "displayName": "Code Definition Options",
+            "isExpanded": false
+        }
+    ],
+
     "inputs": [
         {
             "name": "SonarCloud",
@@ -63,6 +71,15 @@
             }
         },
         {
+            "name": "mainBranch", 
+            "type": "string",
+            "label": "Main Branch Name",
+            "defaultValue": "",
+            "required": false,
+            "visibleRule": "createProject = true",
+            "helpMarkDown": "Define the main branch name, e.g., trunk or release. (Optional)"
+        },
+        {
             "name": "visibility",
             "type": "radio",
             "label": "Visibility",
@@ -89,7 +106,7 @@
             "label": "Long-lived branches (regex)",
             "visibleRule": "createProject = true",
             "required": false,
-            "helpMarkDown": "Long-lived branches (regex), e.g.: (master|qa)"
+            "helpMarkDown": "Long-lived branches (regex), e.g.: (master|qa). (Optional)"
         },
         {
             "name": "sonarQualityGate",
@@ -97,10 +114,46 @@
             "label": "Select the quality gate",
             "visibleRule": "createProject = true",
             "required": false,
-            "helpMarkDown": "Select the quality gate you want to configure in the project",
+            "helpMarkDown": "Select the quality gate you want to configure in the project. (Optional)",
             "properties": {
               "EditableOptions": "True"
             }
+        },
+        {
+            "name": "enableNewCodeDefinition",
+            "groupName": "newCodeDefinitionGroup",
+            "type": "boolean",
+            "label": "Configure New Code Definition",
+            "defaultValue": "false",
+            "required": false,
+            "visibleRule": "createProject = true",
+            "helpMarkDown": "Check to configure new code definition options. (Optional)"
+        },
+        {
+            "name": "newCodeDefinitionType",
+            "groupName": "newCodeDefinitionGroup",
+            "type": "radio",
+            "label": "New Code Definition Type",
+            "defaultValue": "previous_version",
+            "visibleRule": "enableNewCodeDefinition = true",
+            "required": false,
+            "helpMarkDown": "Select the new code definition type. (Optional)",
+            "options": {
+                "previous_version": "Previous Version",
+                "days": "Days",
+                "date": "Date",
+                "version": "Version"
+            }
+        },
+        {
+            "name": "newCodeDefinitionValue",
+            "groupName": "newCodeDefinitionGroup",
+            "type": "string",
+            "label": "New Code Definition Value",
+            "defaultValue": "",
+            "required": false,
+            "visibleRule": "enableNewCodeDefinition = true && newCodeDefinitionType != previous_version",
+            "helpMarkDown": "Define the value for the new code definition type selected. (Optional)"
         }
     ],
     "dataSourceBindings": [
@@ -123,6 +176,9 @@
     ],
     "execution": {
         "Node20_1": {
+            "target": "./index.js"
+        },
+        "Node24": {
             "target": "./index.js"
         }
     }

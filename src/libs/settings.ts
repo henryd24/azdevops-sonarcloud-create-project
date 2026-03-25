@@ -1,30 +1,93 @@
-import fetch from 'node-fetch';
+
+import { info, warn, error } from './logger';
 
 export class Settings{
     baseURL: string;
-    constructor(){
+    header: any;
+    serviceKey: string | undefined;
+    constructor(sonarToken:string|undefined, serviceKey: string|undefined){
         this.baseURL = "https://sonarcloud.io";
+        const base64_token: string = Buffer.from(sonarToken+':').toString('base64');
+        this.header = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + base64_token
+        }
+        this.serviceKey = serviceKey;
     }
-    async setLongLiveBranches(sonarToken:string|undefined,serviceName: string|undefined,longlivebranches: string|undefined){
-        const setLongLiveBranches: string = `${this.baseURL}/api/settings/set?component=${serviceName}&key=sonar.branch.longLivedBranches.regex&value=${longlivebranches}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
+    async setLongLiveBranches(longlivebranches: string|undefined){
+        const setLongLiveBranches: string = `${this.baseURL}/api/settings/set?component=${this.serviceKey}&key=sonar.branch.longLivedBranches.regex&value=${longlivebranches}`;
         await fetch(setLongLiveBranches, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
+            headers: this.header
         })
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`Longlivebranches pattern: ${longlivebranches} were set correctly`)
+                info(`Longlivebranches pattern: ${longlivebranches} were set correctly`)
             }else{
-                console.warn(`Unable to set long duration pattern, error code: ${statusCode}`)
+                warn(`Unable to set long duration pattern, error code: ${statusCode}`)
             }
         })
-        .catch(error => {
-            console.error(error);
+        .catch(err => {
+            error(`${err}`);
+        })
+    }
+    async setNewCodeDefinitionType(newcodedefinitiontype: string|undefined,){
+        const setNewCodeDefinitionType: string = `${this.baseURL}/api/settings/set?component=${this.serviceKey}&key=sonar.leak.period.type&value=${newcodedefinitiontype}`;
+        await fetch(setNewCodeDefinitionType, {
+            method: 'POST',
+            headers: this.header
+        })
+        .then(response => response.status)
+        .then(statusCode =>{
+            if(statusCode == 204){
+                info(`New code definition type: ${newcodedefinitiontype} were set correctly`)
+            }else{
+                warn(`Unable to set new code definition type, error code: ${statusCode}`)
+            }
+        })
+        .catch(err => {
+            error(`${err}`);
+        })
+    }
+
+    async setNewCodeDefinition(newcodedefinitionvalue: string|undefined){
+        const setNewCodeDefinitionValue: string = `${this.baseURL}/api/settings/set?component=${this.serviceKey}&key=sonar.leak.period&value=${newcodedefinitionvalue}`;
+        await fetch(setNewCodeDefinitionValue, {
+            method: 'POST',
+            headers: this.header
+        })
+        .then(response => response.status)
+        .then(statusCode =>{
+            if(statusCode == 204){
+                info(`New code definition value: ${newcodedefinitionvalue} were set correctly`)
+            }else{
+                warn(`Unable to set new code definition value, error code: ${statusCode}`)
+            }
+        })
+        .catch(err => {
+            error(`${err}`);
+        })
+    }
+
+    async mainBranchName(mainbranchname: string|undefined){
+        const setMainBranchName: string = `${this.baseURL}/api/project_branches/rename?project=${this.serviceKey}&name=${mainbranchname}`;
+        await fetch(setMainBranchName, {
+            method: 'POST',
+            headers: this.header
+        })
+        .then(response => response.status)
+        .then(statusCode =>{
+            if(statusCode == 204){
+                info(`Main branch name: ${mainbranchname} were set correctly`)
+            }else if(statusCode == 400){
+                warn(`Unable to set main branch name, the branch name ${mainbranchname} is already in use.`)
+            }else{
+                warn(`Unable to set main branch name, error code: ${statusCode}`)
+            }
+        })
+        .catch(err => {
+            error(`${err}`);
         })
     }
 }

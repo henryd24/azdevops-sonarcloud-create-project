@@ -5,16 +5,17 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "azde-scripts install src",
-    "build": "azde-scripts build src",
-    "pack": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --overrides-file config/release.json",
-    "packupversion": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/release.json",
-    "pack:dev": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --overrides-file config/dev.json",
-    "packupversion:dev": "azde-scripts build src && azde-scripts package src && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/dev.json"
+    "build": "cd src && npm run package",
+    "clean": "rm -rf dist",
+    "pack": "npm run clean && npm run build && tfx extension create --manifest-globs vss-extension.json --overrides-file config/release.json",
+    "packupversion": "npm run clean && npm run build && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/release.json",
+    "pack:dev": "npm run clean && npm run build && tfx extension create --manifest-globs vss-extension.json --overrides-file config/dev.json",
+    "packupversion:dev": "npm run clean && npm run build && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/dev.json"
   },
   "devDependencies": {
-    "tfx-cli": "^0.14.0",
-    "typescript": "^3.5.3",
-    "azde-scripts": "^1.0.0"
+    "azde-scripts": "^1.0.0",
+    "tfx-cli": "^0.23.1",
+    "typescript": "^5.7.2"
   },
   "author": "",
   "license": "ISC"
