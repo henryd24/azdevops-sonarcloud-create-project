@@ -21,9 +21,7 @@ async function run() {
         const newCodeDefinitionType: string | undefined = tl.getInput('newCodeDefinitionType', false);
         let newCodeDefinitionValue: string | undefined = tl.getInput('newCodeDefinitionValue', false);
         const mainBranch: string | undefined = tl.getInput('mainBranch', false);
-        if (newCodeDefinitionType === 'previous_version') {
-            newCodeDefinitionValue = 'previous_version';
-        }
+
         let Project = new Projects();
         await Project.getSonarProject(sonarToken,sonarOrganization,serviceKey);
 
@@ -59,6 +57,10 @@ async function run() {
                 }
 
                 if(enableNewCodeDefinition){
+                    if (newCodeDefinitionType === 'previous_version') {
+                        info('New code definition type is set to previous_version, the new code definition value will be omitted.')
+                        newCodeDefinitionValue = 'previous_version';
+                    }
                     await settings.setNewCodeDefinitionType(newCodeDefinitionType)
                     await settings.setNewCodeDefinition(newCodeDefinitionValue)                    
                 }
