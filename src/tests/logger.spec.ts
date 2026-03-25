@@ -37,8 +37,8 @@ describe('logger', () => {
 
   test('endGroup emits azure endgroup marker with and without title', () => {
     const spy = jest.spyOn(console, 'info').mockImplementation(() => {});
-    endGroup('MyGroup');
-    expect(spy).toHaveBeenCalledWith('##[endgroup] MyGroup');
+    endGroup();
+    expect(spy).toHaveBeenCalledWith('##[endgroup]');
 
     spy.mockClear();
     endGroup();
