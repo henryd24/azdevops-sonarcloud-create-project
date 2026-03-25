@@ -16,6 +16,14 @@
         "Build"
     ],
     "instanceNameFormat": "SonarCloud Create Project",
+    "groups": [
+        {
+            "name": "newCodeDefinitionGroup",
+            "displayName": "Code Definition Options",
+            "isExpanded": false
+        }
+    ],
+
     "inputs": [
         {
             "name": "SonarCloud",
@@ -66,7 +74,7 @@
             "name": "mainBranch", 
             "type": "string",
             "label": "Main Branch Name",
-            "defaultValue": "trunk",
+            "defaultValue": "",
             "required": false,
             "visibleRule": "createProject = true",
             "helpMarkDown": "Define the main branch name, e.g., trunk or release. (Optional)"
@@ -113,42 +121,39 @@
         },
         {
             "name": "enableNewCodeDefinition",
+            "groupName": "newCodeDefinitionGroup",
             "type": "boolean",
             "label": "Configure New Code Definition",
-            "defaultValue": false,
+            "defaultValue": "false",
             "required": false,
             "visibleRule": "createProject = true",
             "helpMarkDown": "Check to configure new code definition options. (Optional)"
         },
         {
+            "name": "newCodeDefinitionType",
             "groupName": "newCodeDefinitionGroup",
-            "label": "New Code Definition Options",
-            "visibleRule": "enableNewCodeDefinition = true AND createProject = true",
-            "inputs": [
-            {
-                "name": "newCodeDefinitionType",
-                "type": "radio",
-                "label": "New Code Definition Type",
-                "defaultValue": "previous_version",
-                "required": false,
-                "helpMarkDown": "Select the new code definition type. (Optional)",
-                "options": {
-                    "previous_version": "Previous Version",
-                    "days": "Days",
-                    "date": "Date",
-                    "version": "Version"
-                }
-            },
-            {
-                "name": "newCodeDefinitionValue",
-                "type": "string",
-                "label": "New Code Definition Value",
-                "defaultValue": "previous_version",
-                "required": false,
-                "visibleRule": "newCodeDefinitionType = days OR newCodeDefinitionType = date OR newCodeDefinitionType = version",
-                "helpMarkDown": "Define the value for the new code definition type selected. (Optional)"
+            "type": "radio",
+            "label": "New Code Definition Type",
+            "defaultValue": "previous_version",
+            "visibleRule": "enableNewCodeDefinition = true",
+            "required": false,
+            "helpMarkDown": "Select the new code definition type. (Optional)",
+            "options": {
+                "previous_version": "Previous Version",
+                "days": "Days",
+                "date": "Date",
+                "version": "Version"
             }
-            ]
+        },
+        {
+            "name": "newCodeDefinitionValue",
+            "groupName": "newCodeDefinitionGroup",
+            "type": "string",
+            "label": "New Code Definition Value",
+            "defaultValue": "",
+            "required": false,
+            "visibleRule": "enableNewCodeDefinition = true && newCodeDefinitionType != previous_version",
+            "helpMarkDown": "Define the value for the new code definition type selected. (Optional)"
         }
     ],
     "dataSourceBindings": [
