@@ -16,7 +16,7 @@ describe('Projects', () => {
         const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
         fetchMock.mockResponseOnce(JSON.stringify({ components: [{ key: 'serviceKey' }] }));
         await projects.getSonarProject('sonarToken', 'sonarOrganization', 'serviceKey');
-        expect(consoleSpy).toHaveBeenCalledWith('##[section]Project serviceKey exists');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Project serviceKey exists'));
         consoleSpy.mockRestore();
     });
 
@@ -25,7 +25,7 @@ describe('Projects', () => {
         const result = { error: [{ message: 'Error' }] }
         fetchMock.mockResponseOnce(JSON.stringify(result));
         await projects.getSonarProject('sonarToken', 'sonarOrganization', 'serviceKey');
-        expect(consoleSpy).toHaveBeenCalledWith(`##[warning]${JSON.stringify(result)}`);
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(JSON.stringify(result)));
         consoleSpy.mockRestore();
     });
 
@@ -35,7 +35,7 @@ describe('Projects', () => {
         await projects.createSonarProject('sonarToken', 'sonarOrganization', 'serviceKey', 'serviceName', 'visibility');
         expect(fetchMock.mock.calls.length).toEqual(1);
         expect(projects.Created).toBe(true);
-        expect(consoleSpy).toHaveBeenCalledWith('##[section]The project serviceKey was successfully created with name serviceName.');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('The project serviceKey was successfully created with name serviceName.'));
         consoleSpy.mockRestore();
     });
 

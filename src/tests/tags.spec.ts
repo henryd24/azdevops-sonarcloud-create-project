@@ -15,14 +15,14 @@ describe('Projects', () => {
         const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
         fetchMock.mockResponseOnce(JSON.stringify({}), { status: 204 });
         await tags.setTags('sonarOrganization', 'tags');
-        expect(consoleSpy).toHaveBeenCalledWith('##[section] Tags: tags were set correctly');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Tags: tags were set correctly'));
         consoleSpy.mockRestore();
     });
     test('setTags  error handling', async () => {
         const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
         fetchMock.mockResponseOnce('', { status: 401 });
         await tags.setTags('sonarOrganization', 'tags');
-        expect(consoleSpy).toHaveBeenCalledWith('##[warning] Could not configure tags, error code: 401');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Could not configure tags, error code: 401'));
         consoleSpy.mockRestore();
     });
 });

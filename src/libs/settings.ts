@@ -1,4 +1,6 @@
 
+import { info, warn, error } from './logger';
+
 export class Settings{
     baseURL: string;
     header: any;
@@ -21,13 +23,13 @@ export class Settings{
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`##[section]Longlivebranches pattern: ${longlivebranches} were set correctly`)
+                info(`Longlivebranches pattern: ${longlivebranches} were set correctly`)
             }else{
-                console.warn(`##[warning]Unable to set long duration pattern, error code: ${statusCode}`)
+                warn(`Unable to set long duration pattern, error code: ${statusCode}`)
             }
         })
-        .catch(error => {
-            console.error(error);
+        .catch(err => {
+            error(`${err}`);
         })
     }
     async setNewCodeDefinitionType(newcodedefinitiontype: string|undefined,){
@@ -39,13 +41,13 @@ export class Settings{
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`##[section]New code definition type: ${newcodedefinitiontype} were set correctly`)
+                info(`New code definition type: ${newcodedefinitiontype} were set correctly`)
             }else{
-                console.warn(`##[warning]Unable to set new code definition type, error code: ${statusCode}`)
+                warn(`Unable to set new code definition type, error code: ${statusCode}`)
             }
         })
-        .catch(error => {
-            console.error(`##[error]${error}`);
+        .catch(err => {
+            error(`${err}`);
         })
     }
 
@@ -58,13 +60,13 @@ export class Settings{
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`##[section]New code definition value: ${newcodedefinitionvalue} were set correctly`)
+                info(`New code definition value: ${newcodedefinitionvalue} were set correctly`)
             }else{
-                console.warn(`##[warning]Unable to set new code definition value, error code: ${statusCode}`)
+                warn(`Unable to set new code definition value, error code: ${statusCode}`)
             }
         })
-        .catch(error => {
-            console.error(`##[error]${error}`);
+        .catch(err => {
+            error(`${err}`);
         })
     }
 
@@ -77,15 +79,15 @@ export class Settings{
         .then(response => response.status)
         .then(statusCode =>{
             if(statusCode == 204){
-                console.info(`##[section]Main branch name: ${mainbranchname} were set correctly`)
+                info(`Main branch name: ${mainbranchname} were set correctly`)
             }else if(statusCode == 400){
-                console.warn(`##[warning]Unable to set main branch name, the branch name ${mainbranchname} is already in use.`)
+                warn(`Unable to set main branch name, the branch name ${mainbranchname} is already in use.`)
             }else{
-                console.warn(`##[warning]Unable to set main branch name, error code: ${statusCode}`)
+                warn(`Unable to set main branch name, error code: ${statusCode}`)
             }
         })
-        .catch(error => {
-            console.error(`##[error]${error}`);
+        .catch(err => {
+            error(`${err}`);
         })
     }
 }

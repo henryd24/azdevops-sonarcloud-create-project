@@ -1,4 +1,5 @@
 import * as tl from "azure-pipelines-task-lib";
+import { group, info, endGroup } from './libs/logger';
 import { Projects } from './libs/projects';
 import { QualityGate } from './libs/quality_gate'
 import { Tags } from "./libs/tags"
@@ -33,12 +34,12 @@ async function run() {
         }
 
         if(createProject=="true"){
-            console.info(`##[group]Project configuration for ${serviceKey} project`)
+            group(`Project configuration for ${serviceKey} project`)
             if(!Project.Created){
-                console.info(`##[section]Creating the ${serviceKey} project`)
+                info(`Creating the ${serviceKey} project`)
                 await Project.createSonarProject(sonarToken,sonarOrganization,serviceKey,serviceName,visibility);
             }else{
-                console.info(`##[section]The creation of ${serviceKey} is omitted.`)
+                info(`The creation of ${serviceKey} is omitted.`)
             }
             if(Project.Created){
                 if(tags){
@@ -66,7 +67,7 @@ async function run() {
                     await settings.mainBranchName(mainBranch)
                 }
             }
-            console.info(`##[endgroup]`)
+            endGroup(`Project ${serviceKey}`)
         }
     }
     catch (err) {

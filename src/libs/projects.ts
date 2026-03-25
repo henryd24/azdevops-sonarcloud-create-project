@@ -1,4 +1,5 @@
 import * as tl from "azure-pipelines-task-lib";
+import { info, warn, success, error } from './logger';
 
 export class Projects{
     baseURL: string;
@@ -22,13 +23,13 @@ export class Projects{
             if("components" in result){
                 for(let i=0; i <= result.components.length-1; i++){
                     if(result.components[i].key == serviceKey){
-                        console.info(`##[section]Project ${serviceKey} exists`);
+                        info(`Project ${serviceKey} exists`);
                         this.Created = true;
                         break
                     }
                 }
             }else{
-                console.warn(`##[warning]${JSON.stringify(result)}`);
+                warn(JSON.stringify(result));
             }
         })
         .catch(error => {
@@ -50,9 +51,11 @@ export class Projects{
         .then(result =>{
             if("project" in result && result.project.key == serviceKey){
                 this.Created = true;
-                console.info(`##[section]The project ${serviceKey} was successfully created with name ${serviceName}.`);
+                success(`The project ${serviceKey} was successfully created with name ${serviceName}.`);
             }else{
-                tl.setResult(tl.TaskResult.Failed, `##[error]The project could not be created, error message: ${JSON.stringify(result)}`);
+                const msg = `The project could not be created, error message: ${JSON.stringify(result)}`;
+                error(msg);
+                tl.setResult(tl.TaskResult.Failed, msg);
             }
         })
         .catch(error => {

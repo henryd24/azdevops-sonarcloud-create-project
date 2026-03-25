@@ -1,4 +1,5 @@
- 
+import { info, warn, error } from "./logger";
+
 export class Tags{
     baseURL: string;
     serviceKey: string | undefined;
@@ -20,14 +21,14 @@ export class Tags{
         })
         .then(response => response.status)
         .then(statusCode =>{
-            if(statusCode == 204){
-                console.info(`##[section]Tags: ${tags} were set correctly`)
+                if(statusCode == 204){
+                info(`Tags: ${tags} were set correctly`)
             }else{
-                console.warn(`##[warning] Could not configure tags, error code: ${statusCode}`)
+                warn(`Could not configure tags, error code: ${statusCode}`)
             }
         })
-        .catch(error => {
-            console.error(`##[error] tags: ${error}`);
+        .catch(err => {
+            error(`tags: ${err}`);
         })
     }
 }

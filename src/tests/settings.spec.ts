@@ -15,8 +15,8 @@ describe('Projects', () => {
         const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
         fetchMock.mockResponseOnce(JSON.stringify({}), { status: 204 });
         await settings.setLongLiveBranches('longlivebranches');
-        expect(consoleSpy).toHaveBeenCalledWith('##[section]Longlivebranches pattern: longlivebranches were set correctly');
-        expect(consoleSpy).not.toHaveBeenCalledWith('##[warning]Unable to set long duration pattern, error code: 401');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Longlivebranches pattern: longlivebranches were set correctly'));
+        expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Unable to set long duration pattern, error code: 401'));
         consoleSpy.mockRestore();
     });
 
@@ -24,7 +24,7 @@ describe('Projects', () => {
         const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
         fetchMock.mockResponseOnce('', { status: 401 });
         await settings.setLongLiveBranches('longlivebranches');
-        expect(consoleWarnSpy).toHaveBeenCalledWith('##[warning]Unable to set long duration pattern, error code: 401');
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Unable to set long duration pattern, error code: 401'));
         consoleWarnSpy.mockRestore();
     });
 
@@ -32,7 +32,7 @@ describe('Projects', () => {
         const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
         fetchMock.mockResponseOnce(JSON.stringify({}), { status: 204 });
         await settings.setNewCodeDefinitionType('newcodedefinitiontype');
-        expect(consoleSpy).toHaveBeenCalledWith('##[section]New code definition type: newcodedefinitiontype were set correctly');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('New code definition type: newcodedefinitiontype were set correctly'));
         consoleSpy.mockRestore();
     });
 
@@ -40,7 +40,7 @@ describe('Projects', () => {
         const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
         fetchMock.mockResponseOnce(JSON.stringify({}), { status: 204 });
         await settings.setNewCodeDefinition('newcodedefinitionvalue');
-        expect(consoleSpy).toHaveBeenCalledWith('##[section]New code definition value: newcodedefinitionvalue were set correctly');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('New code definition value: newcodedefinitionvalue were set correctly'));
         consoleSpy.mockRestore();
     });
 
@@ -48,7 +48,7 @@ describe('Projects', () => {
         const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
         fetchMock.mockResponseOnce('', { status: 400 });
         await settings.mainBranchName('mainbranch');
-        expect(consoleWarnSpy).toHaveBeenCalledWith('##[warning]Unable to set main branch name, the branch name mainbranch is already in use.');
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Unable to set main branch name, the branch name mainbranch is already in use.'));
         consoleWarnSpy.mockRestore();
     });
 
@@ -56,7 +56,7 @@ describe('Projects', () => {
         const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
         fetchMock.mockResponseOnce('', { status: 401 });
         await settings.setNewCodeDefinitionType('newcodedefinitiontype');
-        expect(consoleWarnSpy).toHaveBeenCalledWith('##[warning]Unable to set new code definition type, error code: 401');
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Unable to set new code definition type, error code: 401'));
         consoleWarnSpy.mockRestore();
     });
 
@@ -64,7 +64,7 @@ describe('Projects', () => {
         const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
         fetchMock.mockResponseOnce('', { status: 401 });
         await settings.setNewCodeDefinition('newcodedefinitionvalue');
-        expect(consoleWarnSpy).toHaveBeenCalledWith('##[warning]Unable to set new code definition value, error code: 401');
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Unable to set new code definition value, error code: 401'));
         consoleWarnSpy.mockRestore();
     });
 
@@ -72,7 +72,7 @@ describe('Projects', () => {
         const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
         fetchMock.mockResponseOnce('', { status: 500 });
         await settings.mainBranchName('mainbranch');
-        expect(consoleWarnSpy).toHaveBeenCalledWith('##[warning]Unable to set main branch name, error code: 500');
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Unable to set main branch name, error code: 500'));
         consoleWarnSpy.mockRestore();
     });
 
@@ -80,7 +80,7 @@ describe('Projects', () => {
         const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
         fetchMock.mockRejectOnce(new Error('network'));
         await settings.setNewCodeDefinitionType('type');
-        expect(consoleErrorSpy).toHaveBeenCalledWith('##[error]Error: network');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error: network'));
         consoleErrorSpy.mockRestore();
     });
 
@@ -88,7 +88,7 @@ describe('Projects', () => {
         const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
         fetchMock.mockRejectOnce(new Error('network2'));
         await settings.setNewCodeDefinition('value');
-        expect(consoleErrorSpy).toHaveBeenCalledWith('##[error]Error: network2');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error: network2'));
         consoleErrorSpy.mockRestore();
     });
 
