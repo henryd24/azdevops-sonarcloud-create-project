@@ -26,7 +26,7 @@ export function mockSonar(routes: Record<string, Handler | { status?: number; bo
         const route = routes[`${req.method} ${url.pathname}`];
         const result = typeof route === "function" ? route(call) : route;
         if (!result) {
-            return req.method === "POST" ? { status: 204, body: "" } : { status: 404, body: JSON.stringify({ errors: [{ msg: "Not found" }] }) };
+            return req.method === "POST" ? { status: 204 } : { status: 404, body: JSON.stringify({ errors: [{ msg: "Not found" }] }) };
         }
         return {
             status: result.status ?? 200,

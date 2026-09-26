@@ -73,7 +73,7 @@ describe("SonarClient", () => {
     });
 
     test("retries 404 responses only when configured for a newly created project", async () => {
-        fetchMock.mockResponses(["", { status: 404 }], ["", { status: 404 }], ["", { status: 204 }]);
+        fetchMock.mockResponses(["", { status: 404 }], ["", { status: 404 }], new Response(null, { status: 204 }));
         await expect(newClient().withNotFoundRetries(2).post("/api/settings/set")).resolves.toBeUndefined();
         expect(fetchMock.mock.calls.length).toBe(3);
 
@@ -89,7 +89,7 @@ describe("SonarClient", () => {
     });
 
     test("returns undefined for empty POST responses", async () => {
-        fetchMock.mockResponse("", { status: 204 });
+        fetchMock.mockResponse(new Response(null, { status: 204 }));
         await expect(newClient().post("/api/x")).resolves.toBeUndefined();
     });
 });
