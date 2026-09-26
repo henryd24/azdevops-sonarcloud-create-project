@@ -18,12 +18,9 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
-    "@types/mocha": "^10.0.1",
     "@types/node": "^24.10.0",
-    "@types/q": "^1.5.5",
     "@vercel/ncc": "^0.38.4",
     "jest-fetch-mock": "^3.0.3",
-    "sync-request": "^6.1.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.7.2"
   },

@@ -1,0 +1,57 @@
+name: CI
+
+# Security notes:
+# - Uses `pull_request` (never `pull_request_target`): PRs from forks run with a
+#   read-only token and without access to repository secrets.
+# - This workflow must not use secrets. Publishing the extension belongs in a
+#   separate workflow that only runs on protected branches/tags.
+# - Third-party actions are pinned to a full commit SHA (a tag can be moved).
+# - Dependencies are installed with --ignore-scripts so no package can run
+#   install hooks (the vector used by npm worms such as Shai-Hulud).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+
+      - name: Install dependencies (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify registry signatures of installed packages
+        run: npm audit signatures
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Typecheck
+        run: npx --no-install tsc --noEmit -p tsconfig.json
+
+      - name: Test
+        run: npm test -- --coverage
+
+      - name: Build
+        run: npm run package

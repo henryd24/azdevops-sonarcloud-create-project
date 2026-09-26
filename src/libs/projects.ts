@@ -1,65 +1,46 @@
-import * as tl from "azure-pipelines-task-lib";
-import { info, warn, success, error } from './logger';
+import { SonarClient } from "./client";
+import { Visibility } from "./config";
+import { StepContext } from "./step";
 
-export class Projects{
-    baseURL: string;
-    Created: boolean
-    constructor(){
-        this.baseURL = "https://sonarcloud.io";
-        this.Created = false;
-    }
-    async getSonarProject(sonarToken:string|undefined, sonarOrganization: string|undefined ,serviceKey: string|undefined){
-        const getPorjectUrl: string = `${this.baseURL}/api/projects/search?organization=${sonarOrganization}&projects=${serviceKey}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
-        await fetch(getPorjectUrl, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
-        })
-        .then(response => response.json())
-        .then(result =>{
-            if("components" in result){
-                for(let i=0; i <= result.components.length-1; i++){
-                    if(result.components[i].key == serviceKey){
-                        info(`Project ${serviceKey} exists`);
-                        this.Created = true;
-                        break
-                    }
-                }
-            }else{
-                warn(JSON.stringify(result));
-            }
-        })
-        .catch(error => {
-            tl.setResult(tl.TaskResult.Failed, (error as Error).toString());
-        })
+export interface SonarProject {
+    key: string;
+    name: string;
+    visibility?: Visibility;
+    organization?: string;
+}
+
+export class Projects {
+    constructor(private readonly client: SonarClient) { }
+
+    async find(organization: string, projectKey: string): Promise<SonarProject | undefined> {
+        const result = await this.client.get<{ components?: SonarProject[] }>("/api/projects/search", {
+            organization,
+            projects: projectKey
+        });
+        return result.components?.find(c => c.key === projectKey);
     }
 
-    async createSonarProject(sonarToken:string|undefined, sonarOrganization: string|undefined ,serviceKey: string|undefined,serviceName: string|undefined,visibility: string|undefined){
-        const createPorjectUrl: string = `${this.baseURL}/api/projects/create?organization=${sonarOrganization}&project=${serviceKey}&name=${serviceName}&visibility=${visibility}`;
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64')
-        await fetch(createPorjectUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + base64_token
-            }
-        })
-        .then(response => response.json())
-        .then(result =>{
-            if("project" in result && result.project.key == serviceKey){
-                this.Created = true;
-                success(`The project ${serviceKey} was successfully created with name ${serviceName}.`);
-            }else{
-                const msg = `The project could not be created, error message: ${JSON.stringify(result)}`;
-                error(msg);
-                tl.setResult(tl.TaskResult.Failed, msg);
-            }
-        })
-        .catch(error => {
-            tl.setResult(tl.TaskResult.Failed, `${(error as Error).toString()}`);
-        })
+    async create(organization: string, projectKey: string, name: string, visibility: Visibility): Promise<SonarProject> {
+        const result = await this.client.post<{ project?: SonarProject }>("/api/projects/create", {
+            organization,
+            project: projectKey,
+            name,
+            visibility
+        });
+        if (!result?.project || result.project.key !== projectKey) {
+            throw new Error(`Unexpected response while creating project ${projectKey}: ${JSON.stringify(result)}`);
+        }
+        return { visibility, ...result.project };
     }
- }
+
+    projectUrl(projectKey: string): string {
+        return `${this.client.baseUrl}/project/overview?id=${encodeURIComponent(projectKey)}`;
+    }
+}
+
+export async function ensureVisibility(ctx: StepContext, current: Visibility | undefined, desired: Visibility): Promise<void> {
+    if (current === desired) return;
+    await ctx.apply(`Visibility changed from ${current ?? "unknown"} to ${desired}`, () =>
+        ctx.client.post("/api/projects/update_visibility", { project: ctx.projectKey, visibility: desired })
+    );
+}

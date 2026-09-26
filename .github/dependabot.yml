@@ -1,0 +1,29 @@
+version: 2
+updates:
+  # Keeps the SHA-pinned actions up to date.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Dependencies bundled in the extension and dev tooling.
+  # The cooldown skips versions published less than N days ago, which is the window
+  # in which most compromised packages are detected and removed from npm.
+  - package-ecosystem: npm
+    directory: /src
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    groups:
+      dev-dependencies:
+        dependency-type: development
+      production-dependencies:
+        dependency-type: production
+    open-pull-requests-limit: 5
