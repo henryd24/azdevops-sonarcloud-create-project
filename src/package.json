@@ -17,12 +17,12 @@
     "azure-pipelines-task-lib": "^5.2.4"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^24.10.0",
-    "@vercel/ncc": "^0.38.4",
-    "jest-fetch-mock": "^3.0.3",
-    "ts-jest": "^29.1.2",
-    "typescript": "^5.7.2"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.4.0",
+    "@vercel/ncc": "^0.45.0",
+    "jest-fetch-mock": "^4.2.0",
+    "ts-jest": "^29.4.12",
+    "typescript": "^7.0.2"
   },
   "description": ""
 }
