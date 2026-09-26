@@ -1,34 +1,29 @@
-import { info, warn, error } from "./logger";
+import { StepContext } from "./step";
 
-export class Tags{
-    baseURL: string;
-    serviceKey: string | undefined;
-    header: any;
-    constructor(sonarToken:string|undefined, serviceKey: string|undefined){
-        this.baseURL = "https://sonarcloud.io";
-        const base64_token: string = Buffer.from(sonarToken+':').toString('base64');
-        this.header = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Basic ' + base64_token
-        }
-        this.serviceKey = serviceKey;
+async function currentTags(ctx: StepContext): Promise<string[] | undefined> {
+    try {
+        const result = await ctx.client.get<{ component?: { tags?: string[] } }>("/api/components/show", {
+            component: ctx.projectKey
+        });
+        return result.component?.tags;
+    } catch {
+        // If the current tags cannot be read, fall back to always setting them.
+        return undefined;
     }
-    async setTags(sonarOrganization: string|undefined, tags: string|undefined){
-        const setQualityGate: string = `${this.baseURL}/api/project_tags/set?organization=${sonarOrganization}&project=${this.serviceKey}&tags=${tags}`;
-        await fetch(setQualityGate, {
-            method: 'POST',
-            headers: this.header
+}
+
+function sameTags(a: string[], b: string[]): boolean {
+    return a.length === b.length && [...a].sort().join(",") === [...b].sort().join(",");
+}
+
+export async function ensureTags(ctx: StepContext, desired: string[]): Promise<void> {
+    const current = await currentTags(ctx);
+    if (current && sameTags(current, desired)) return;
+    await ctx.apply(`Tags set to: ${desired.join(", ")}`, () =>
+        ctx.client.post("/api/project_tags/set", {
+            organization: ctx.organization,
+            project: ctx.projectKey,
+            tags: desired.join(",")
         })
-        .then(response => response.status)
-        .then(statusCode =>{
-                if(statusCode == 204){
-                info(`Tags: ${tags} were set correctly`)
-            }else{
-                warn(`Could not configure tags, error code: ${statusCode}`)
-            }
-        })
-        .catch(err => {
-            error(`tags: ${err}`);
-        })
-    }
+    );
 }
