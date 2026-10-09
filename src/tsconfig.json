@@ -4,6 +4,7 @@
     "types": ["jest"],
     "moduleResolution": "Node",
     "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
     "target": "ES2022",
     "removeComments": true,
     "rootDir": "./",
