@@ -14,7 +14,7 @@
   "author": "Henry Mosquera",
   "license": "ISC",
   "dependencies": {
-    "azure-pipelines-task-lib": "^5.281.0"
+    "azure-pipelines-task-lib": "^5.281.1"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
