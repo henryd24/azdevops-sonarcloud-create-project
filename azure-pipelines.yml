@@ -13,14 +13,14 @@
 # The .vsix itself is built by GitHub Actions (.github/workflows/release.yml); this pipeline is the
 # functional check for the release pull request, so the release is only merged if it works.
 
-# Runs only for release pull requests: they are the ones that change config/release.json (the
-# version bump made by the Release workflow). It can also be queued manually from Azure DevOps.
+# Runs for every pull request so that its status check always reports (it is a required check on
+# `main`; a check that never starts would block unrelated PRs). The SonarCloud E2E stage, which is
+# the expensive part, only runs for release pull requests (branch release/*, opened by the Release
+# workflow) and for manual runs from Azure DevOps.
 trigger: none
 pr:
   branches:
     include: [main]
-  paths:
-    include: [config/release.json]
 
 variables:
   - name: NODE_VERSION
@@ -57,8 +57,16 @@ stages:
   - stage: E2E
     displayName: Validate against SonarCloud
     dependsOn: Build
-    # Secrets are not available to builds of forks, so skip there.
-    condition: and(succeeded(), ne(variables['System.PullRequest.IsFork'], 'True'))
+    # Only for release PRs and manual runs. Secrets are not available to builds of forks, so skip there.
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables['System.PullRequest.IsFork'], 'True'),
+        or(
+          eq(variables['Build.Reason'], 'Manual'),
+          startsWith(variables['System.PullRequest.SourceBranch'], 'refs/heads/release/')
+        )
+      )
     variables:
       - group: azdevops-sonarcloud-create-project
     jobs:
