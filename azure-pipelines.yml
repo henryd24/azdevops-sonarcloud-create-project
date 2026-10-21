@@ -63,6 +63,7 @@ stages:
   - stage: E2E
     displayName: Validate against SonarCloud
     dependsOn: Build
+    # GitHub PRs report System.PullRequest.SourceBranch without the refs/heads/ prefix (e.g. release/v1.2.3).
     # Only for release PRs and manual runs. Secrets are not available to builds of forks, so skip there.
     condition: >-
       and(
@@ -70,6 +71,7 @@ stages:
         ne(variables['System.PullRequest.IsFork'], 'True'),
         or(
           eq(variables['Build.Reason'], 'Manual'),
+          startsWith(variables['System.PullRequest.SourceBranch'], 'release/'),
           startsWith(variables['System.PullRequest.SourceBranch'], 'refs/heads/release/')
         )
       )
