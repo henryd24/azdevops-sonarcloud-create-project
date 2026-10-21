@@ -32,8 +32,12 @@ stages:
     jobs:
       - job: build
         displayName: Test and bundle the task
+        # Runs on every PR, so it uses the self-hosted pool to avoid spending Microsoft-hosted minutes.
         pool:
-          vmImage: ubuntu-latest
+          name: HenDa24
+          demands: Agent.OS -equals Linux
+        workspace:
+          clean: all
         steps:
           - task: NodeTool@0
             inputs:
@@ -70,20 +74,36 @@ stages:
     variables:
       - group: azdevops-sonarcloud-create-project
     jobs:
-      - job: e2e
+      # Linux runs on the self-hosted pool; Windows and macOS need Microsoft-hosted agents (these only run for release PRs).
+      - job: e2e_linux
+        displayName: E2E on
+        timeoutInMinutes: 30
+        strategy:
+          matrix:
+            linux_node20:
+              nodeVersion: 20.x
+              jobKey: linux20
+            linux_node24:
+              nodeVersion: 24.x
+              jobKey: linux24
+        pool:
+          name: HenDa24
+          demands: Agent.OS -equals Linux
+        workspace:
+          clean: all
+        variables:
+          # Non-secret variables reach every step as environment variables; SONAR_TOKEN is mapped per step.
+          SONAR_ORGANIZATION: $(SonarOrganization)
+          TASK_DIR: $(Pipeline.Workspace)/task
+        steps:
+          - template: .azure/e2e-steps.yml
+
+      - job: e2e_hosted
         displayName: E2E on
         timeoutInMinutes: 30
         strategy:
           maxParallel: 2
           matrix:
-            linux_node20:
-              vmImage: ubuntu-latest
-              nodeVersion: 20.x
-              jobKey: linux20
-            linux_node24:
-              vmImage: ubuntu-latest
-              nodeVersion: 24.x
-              jobKey: linux24
             windows:
               vmImage: windows-latest
               nodeVersion: 20.x
@@ -95,83 +115,7 @@ stages:
         pool:
           vmImage: $(vmImage)
         variables:
-          # Non-secret variables reach every step as environment variables; SONAR_TOKEN is mapped per step.
           SONAR_ORGANIZATION: $(SonarOrganization)
           TASK_DIR: $(Pipeline.Workspace)/task
         steps:
-          - checkout: self
-          - task: NodeTool@0
-            inputs:
-              versionSpec: $(nodeVersion)
-          - download: current
-            artifact: task
-
-          # Project keys are global in SonarCloud: prefix with the organization and make them unique per run and job.
-          - bash: echo "##vso[task.setvariable variable=projectKey]$(SonarOrganization)_e2e_$(Build.BuildId)_$(jobKey)"
-            displayName: Compute project key
-
-          - script: node scripts/e2e/sonar.js check $(projectKey) --absent
-            displayName: Project does not exist yet
-            env:
-              SONAR_TOKEN: $(SonarToken)
-
-          # --- Existence check only (createProject=false) must fail for a missing project
-          - script: node scripts/e2e/run-task.js --expect-failure createProject=false sonarOrganization=$(SonarOrganization) serviceKey=$(projectKey)
-            name: missing
-            displayName: Check-only fails when the project is missing
-            env:
-              SONAR_TOKEN: $(SonarToken)
-          - script: node scripts/e2e/expect.js "echo $(missing.SonarProjectExists)" "false"
-            displayName: SonarProjectExists = false
-
-          # --- Dry run must not create anything
-          - script: node scripts/e2e/run-task.js createProject=true dryRun=true visibility=public sonarOrganization=$(SonarOrganization) serviceKey=$(projectKey)
-            name: dryrun
-            displayName: Dry run
-            env:
-              SONAR_TOKEN: $(SonarToken)
-          - script: node scripts/e2e/expect.js "echo $(dryrun.SonarProjectCreated)" "false"
-            displayName: Dry run created nothing (output)
-          - script: node scripts/e2e/sonar.js check $(projectKey) --absent
-            displayName: Dry run created nothing (API)
-            env:
-              SONAR_TOKEN: $(SonarToken)
-
-          # --- Create a public project with its configuration
-          - script: node scripts/e2e/run-task.js createProject=true visibility=public failOnConfigError=true tags=e2e,azdo mainBranch=e2e-main enableNewCodeDefinition=true newCodeDefinitionType=days newCodeDefinitionValue=30 additionalSettings=sonar.coverage.exclusions=**/tests/** sonarOrganization=$(SonarOrganization) serviceKey=$(projectKey)
-            name: create
-            displayName: Create public project and configure it
-            env:
-              SONAR_TOKEN: $(SonarToken)
-          - script: node scripts/e2e/expect.js "echo $(create.SonarProjectCreated)" "true"
-            displayName: SonarProjectCreated = true
-          - script: node scripts/e2e/expect.js "echo $(create.SonarProjectKey)" "$(projectKey)"
-            displayName: SonarProjectKey output
-          - script: node scripts/e2e/sonar.js check $(projectKey) --visibility public --tags e2e,azdo --setting sonar.coverage.exclusions=**/tests/** --main-branch e2e-main
-            displayName: Project is configured as requested (API)
-            env:
-              SONAR_TOKEN: $(SonarToken)
-
-          # --- Running it again must be idempotent
-          - script: node scripts/e2e/run-task.js createProject=true visibility=public failOnConfigError=true tags=e2e,azdo mainBranch=e2e-main enableNewCodeDefinition=true newCodeDefinitionType=days newCodeDefinitionValue=30 additionalSettings=sonar.coverage.exclusions=**/tests/** sonarOrganization=$(SonarOrganization) serviceKey=$(projectKey)
-            name: again
-            displayName: Run again (idempotent)
-            env:
-              SONAR_TOKEN: $(SonarToken)
-          - script: node scripts/e2e/expect.js "echo $(again.SonarProjectExists)" "true"
-            displayName: SonarProjectExists = true
-          - script: node scripts/e2e/expect.js "echo $(again.SonarProjectCreated)" "false"
-            displayName: Nothing was created the second time
-
-          # --- Check-only now succeeds
-          - script: node scripts/e2e/run-task.js createProject=false sonarOrganization=$(SonarOrganization) serviceKey=$(projectKey)
-            displayName: Check-only succeeds when the project exists
-            env:
-              SONAR_TOKEN: $(SonarToken)
-
-          # --- Always remove the throwaway project
-          - script: node scripts/e2e/sonar.js delete $(projectKey)
-            displayName: Delete test project
-            condition: always()
-            env:
-              SONAR_TOKEN: $(SonarToken)
+          - template: .azure/e2e-steps.yml
