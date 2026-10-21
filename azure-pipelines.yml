@@ -11,14 +11,16 @@
 #   SonarOrganization            SonarCloud organization key
 #
 # The .vsix itself is built by GitHub Actions (.github/workflows/release.yml); this pipeline is the
-# functional check for the release pull request.
+# functional check for the release pull request, so the release is only merged if it works.
 
-trigger:
-  branches:
-    include: [main]
+# Runs only for release pull requests: they are the ones that change config/release.json (the
+# version bump made by the Release workflow). It can also be queued manually from Azure DevOps.
+trigger: none
 pr:
   branches:
     include: [main]
+  paths:
+    include: [config/release.json]
 
 variables:
   - name: NODE_VERSION
