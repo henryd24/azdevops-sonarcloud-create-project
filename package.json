@@ -13,7 +13,7 @@
     "packupversion:dev": "npm run clean && npm run build && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/dev.json"
   },
   "devDependencies": {
-    "azde-scripts": "^1.0.0",
+    "azde-scripts": "^2.0.2",
     "tfx-cli": "^0.23.1",
     "typescript": "^5.7.2"
   },
