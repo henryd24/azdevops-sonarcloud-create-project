@@ -36,3 +36,22 @@ updates:
       # ts-jest declares peer typescript <7; TypeScript 7 breaks npm ci until it supports it.
       - dependency-name: typescript
         update-types: ["version-update:semver-major"]
+
+  # Packaging tools in the root package.json (tfx-cli, azde-scripts). They are not shipped in the .vsix,
+  # but their lockfile is scanned, so keep it up to date. Same grouping as the task dependencies.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    groups:
+      security:
+        applies-to: security-updates
+        patterns: ["*"]
+      all-dependencies:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    open-pull-requests-limit: 5
