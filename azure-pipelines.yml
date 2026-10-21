@@ -42,6 +42,8 @@ stages:
           - task: NodeTool@0
             inputs:
               versionSpec: $(NODE_VERSION)
+              # Self-hosted agents cache old builds of 20.x; ncc needs >= 20.12 (crypto.hash).
+              checkLatest: true
           - script: npm ci --ignore-scripts --no-audit --no-fund
             workingDirectory: src
             displayName: Install
