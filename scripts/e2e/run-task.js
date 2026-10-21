@@ -54,9 +54,17 @@ for (const dir of [env.AGENT_TEMPDIRECTORY, env.AGENT_WORKFOLDER]) fs.mkdirSync(
 
 let failed = false;
 const child = spawn(process.execPath, [bundle], { env, stdio: ["inherit", "pipe", "inherit"] });
-child.stdout.on("data", (chunk) => {
-  process.stdout.write(chunk);
-  if (/##vso\[task\.complete [^\]]*result=Failed/.test(chunk.toString())) failed = true;
+// The agent marks a step as failed when it sees task.complete/task.issue errors, whatever the exit
+// code of this script. With --expect-failure those lines are printed as plain text instead, so the
+// step only fails if the task did NOT fail. Everything else (output variables) still reaches the agent.
+const rl = require("node:readline").createInterface({ input: child.stdout, crlfDelay: Infinity });
+rl.on("line", (line) => {
+  if (/##vso\[task\.complete [^\]]*result=Failed/.test(line)) failed = true;
+  if (expectFailure) {
+    if (/##vso\[task\.complete /.test(line)) return console.log(line.replace(/^##vso\[task\.complete [^\]]*\]/, "(expected failure) "));
+    if (/##vso\[task\.issue type=error/.test(line)) return console.log(line.replace(/^##vso\[task\.issue [^\]]*\]/, "(expected error) "));
+  }
+  console.log(line);
 });
 child.on("close", (code) => {
   failed = failed || code !== 0;
