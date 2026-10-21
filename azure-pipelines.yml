@@ -24,7 +24,7 @@ pr:
 
 variables:
   - name: NODE_VERSION
-    value: 20.x
+    value: 24.x
 
 stages:
   - stage: Build
@@ -39,10 +39,10 @@ stages:
         workspace:
           clean: all
         steps:
-          - task: NodeTool@0
+          - task: UseNode@1
             inputs:
-              versionSpec: $(NODE_VERSION)
-              # Self-hosted agents cache old builds of 20.x; ncc needs >= 20.12 (crypto.hash).
+              version: $(NODE_VERSION)
+              # Self-hosted agents cache old builds of a major; ncc needs >= 20.12 (crypto.hash).
               checkLatest: true
           - script: npm ci --ignore-scripts --no-audit --no-fund
             workingDirectory: src
@@ -108,12 +108,12 @@ stages:
           matrix:
             windows:
               vmImage: windows-latest
-              nodeVersion: 20.x
-              jobKey: win20
+              nodeVersion: 24.x
+              jobKey: win24
             macos:
               vmImage: macOS-latest
-              nodeVersion: 20.x
-              jobKey: mac20
+              nodeVersion: 24.x
+              jobKey: mac24
         pool:
           vmImage: $(vmImage)
         variables:
