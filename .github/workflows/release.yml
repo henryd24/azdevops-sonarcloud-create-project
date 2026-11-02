@@ -6,10 +6,14 @@ name: Release
 #      version in config/release.json and src/task.json, verifies the result (typecheck,
 #      tests, build, packaging) and opens a "release vX.Y.Z" pull request.
 #   2. Merge that pull request. The push to `main` creates the tag and the GitHub Release
-#      with the .vsix attached.
+#      with the .vsix attached, then publishes that same .vsix to the Visual Studio
+#      Marketplace using Trusted Publishing (OIDC).
 #
 # Security notes:
 # - No secrets: only the workflow's GITHUB_TOKEN is used, with write access scoped per job.
+#   Marketplace publishing uses a short-lived credential obtained via OIDC (no PAT). The
+#   Trusted Publishing policy in the Marketplace is bound to this file name (release.yml),
+#   so the publish job must stay in this workflow.
 # - The bump commit is created through the GitHub API, so GitHub signs it ("Verified").
 # - Pull requests opened with GITHUB_TOKEN do not trigger other workflows; the prepare job
 #   runs the full checks itself before opening the PR.
@@ -102,6 +106,9 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -136,3 +143,37 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
         run: gh release create "v$VERSION" out/*.vsix --title "v$VERSION" --generate-notes --target "$GITHUB_SHA"
+
+  marketplace:
+    name: Publish to Marketplace
+    needs: release
+    if: needs.release.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # request the OIDC token exchanged for a Marketplace credential
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Install packaging tools (tfx-cli)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      # Publish the exact .vsix attached to the GitHub Release instead of rebuilding it.
+      - name: Download .vsix from the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: gh release download "v$VERSION" --pattern '*.vsix' --dir out
+
+      - name: Get Marketplace credential (OIDC)
+        run: node .github/scripts/marketplace-token.mjs "$(node -p "require('./config/release.json').publisher")"
+
+      - name: Publish to Marketplace
+        run: npx --no-install tfx extension publish --vsix out/*.vsix --auth-type pat --token "$MARKETPLACE_TOKEN" --no-prompt
