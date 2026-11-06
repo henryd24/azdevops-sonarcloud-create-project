@@ -4,7 +4,7 @@
   "description": "An extension to check and create projects in sonarcloud. This extension is designed to help with [SonarCloud](https://sonarcloud.io/) by providing a helper task.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "azde-scripts install src",
+    "postinstall": "npm ci --prefix src",
     "build": "cd src && npm run package",
     "clean": "rm -rf dist",
     "pack": "npm run clean && npm run build && tfx extension create --manifest-globs vss-extension.json --overrides-file config/release.json",
@@ -13,17 +13,9 @@
     "packupversion:dev": "npm run clean && npm run build && tfx extension create --manifest-globs vss-extension.json --rev-version --overrides-file config/dev.json"
   },
   "devDependencies": {
-    "azde-scripts": "^2.0.2",
     "tfx-cli": "^0.24.2",
     "typescript": "^7.0.2"
   },
   "author": "",
-  "license": "ISC",
-  "overrides": {
-    "simple-git": "^4.0.1",
-    "@simple-git/argv-parser": "^2.0.1",
-    "tar": "^7.5.20",
-    "uuid": "^13.0.1",
-    "@tootallnate/once": "^2.0.1"
-  }
+  "license": "ISC"
 }
