@@ -18,7 +18,7 @@
     "azure-pipelines-task-lib": "^5.282.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^7.29.13",
     "@babel/preset-env": "^7.29.0",
     "@babel/preset-typescript": "^7.29.0",
     "@types/jest": "^30.0.0",
