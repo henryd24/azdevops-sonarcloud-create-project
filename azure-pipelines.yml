@@ -14,13 +14,13 @@
 # functional check for the release pull request, so the release is only merged if it works.
 
 # Runs for every pull request so that its status check always reports (it is a required check on
-# `main`; a check that never starts would block unrelated PRs). The SonarCloud E2E stage, which is
+# `trunk`; a check that never starts would block unrelated PRs). The SonarCloud E2E stage, which is
 # the expensive part, only runs for release pull requests (branch release/*, opened by the Release
 # workflow) and for manual runs from Azure DevOps.
 trigger: none
 pr:
   branches:
-    include: [main]
+    include: [trunk]
 
 variables:
   - name: NODE_VERSION
