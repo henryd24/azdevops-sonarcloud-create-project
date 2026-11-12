@@ -10,7 +10,7 @@ name: CI
 # Changes that do not affect the code (documentation, markdown, license, images) do not run CI.
 on:
   push:
-    branches: [main]
+    branches: [trunk]
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -18,7 +18,7 @@ on:
       - "LICENSE"
       - ".gitignore"
   pull_request:
-    branches: [main]
+    branches: [trunk]
     paths-ignore:
       - "**.md"
       - "docs/**"
